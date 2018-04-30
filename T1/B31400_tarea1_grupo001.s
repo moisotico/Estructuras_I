@@ -7,14 +7,14 @@
 # Las tareas  se pueden ver en: https://github.com/moisotico																#
 #***************************************************************************************************************************#
 #***************************************************************************************************************************#
-#	El siguiente programa inmpementa en la parte1 un BubbleSort para ordenar un vector, calcular sus elementos y pasarlos a	#
-# $v0,e imprimir el numero de estos. Ademas de imprimir el vector Des[] antes y despues de dicho cambio, con print0 y print1#
-# respectivamente. La segunda parte agarra dicho vector y a traves de dos direcciones ordena, de forma ascendente los		#
-# numeros pares y de forma descendente lo impares, en el vector Ord[]. Se toma como referencia un solo recorrido ascendente	#
-# a traves de Des[] y se imprime el vector Ord con print2.																	#
+# El siguiente programa inmpementa en la parte1 un BubbleSort para ordenar un vector, calcular sus elementos y pasarlos a
+# $v0,e imprimir el numero de estos. Ademas de imprimir el vector Des[] antes y despues de dicho cambio, con print0 y print1
+# respectivamente. La segunda parte agarra dicho vector y a traves de dos direcciones ordena, de forma ascendente los numeros
+# pares y de forma descendente lo impares, en el vector Ord[]. Se toma como referencia un solo recorrido ascendente a traves
+# de Des[] y se imprime el vector Ord con print2.																	#
 #***************************************************************************************************************************#
 #***************************************************************************************************************************#
-# Nota: el programa por default soporta solo 499 entradas en Ord, sin embargo se puede cambiar el 500 en la linea 23 por un #
+# Nota: el programa por default soporta solo 499 entradas en Ord, sin embargo se puede cambiar el 500 en la linea 23 por un 
 # valor mayor.																												#
 #***************************************************************************************************************************#
 # $s0: swap,  $s1: contar, $s2: j, $s3: i, $s4:k , $s5: numElementos   														#
