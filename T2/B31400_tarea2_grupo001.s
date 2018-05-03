@@ -20,15 +20,15 @@
 	ask_input: .asciiz "\nEscriba una frase de menos de 30 caracteres, solo puede contener puntos, comas o espacios (., ):"
 	buffer1: 	.space 30 
 	buffer2:	.space 30
-	show_input: .asciiz "\nLa frase escrita fue: "
+	show_input: .asciiz "\nLa frase escrita fue: \n"
 	msj: 	.asciiz	"longitud de string: "
 	Char:	.asciiz "\nLetra: "
 	Enter: 	.asciiz "\n"
 	yes: 	.asciiz "La frase es un palindromo\n"
 	nope:	.asciiz "La frase NO es un palindromo!\n"
 	err:	.asciiz "\nAdvertencia: algunos caracteres no se pudieron leer!! Se procede a ignorarlos.\n" 
-	retry_msg: .asciiz "Desea probar otra frase? (S/n): "
-	retry_input: .space 3
+	retry_msg: .asciiz "Desea probar otra frase? (Y, y, S, s, Enter para seguir; otras teclas para salir): "
+	retry_input: .space 4
 	
 	
 .text
@@ -80,9 +80,9 @@ while_true:
 	#	li 	$v0, 1
 	#	syscall	
 
-		la $a0, Char			#texto explicativo
-		li $v0, 4 
-		syscall
+	#	la $a0, Char			#texto explicativo
+	#	li $v0, 4 
+	#	syscall
 
 		move $t0, $s0			# $t0 parte de la direccion del string 
 		and $t4, $t4, $0		# t4 = strlen = 0 
@@ -96,13 +96,13 @@ while_true:
 		addi $s6, $0, 91		# banda sup. de Mayusc	
 		
 		lb $t1, 0($t0) 			#t1 es str[t0]
-		move $a0, $t1			#codigo ascii de la letra
-		li 	$v0, 1
-		syscall	
+	#	move $a0, $t1			#codigo ascii de la letra
+	#	li 	$v0, 1
+	#	syscall	
 
-		la $a0, Enter			
-		li $v0, 4 
-		syscall
+	#	la $a0, Enter			
+	#	li $v0, 4 
+	#	syscall
 		
 		beq $t1, 10, out			#si el char es una nueva linea termina el string
 
@@ -141,9 +141,12 @@ while_true:
 		
 		next:
 			addi $t0, $t0, 1		# i++
+			addi $t8, $t8, 1	
 			j L_string
 	
 	out:
+		slt $t9, $t4, 2  
+		beq $t9, 1, false
 		move $a2, $t4			#paso strlen a $a2 
 		beq $s7, $0, cont 
 	
@@ -153,14 +156,14 @@ while_true:
 		syscall
 	
 	cont:
-	add $t1, $s1, $0		# $t1: es direccion de inicio para str reducido
-	add $t2, $s1, $a2		
-	addi $t2, $t2, -1		# t2 = dir de inicio+strlen-1
+		add $t1, $s1, $0		# $t1: es direccion de inicio para str reducido
+		add $t2, $s1, $a2		
+		addi $t2, $t2, -1		# t2 = dir de inicio+strlen-1
 	
 L2:	
-	slt $t4, $t1, $t2		#$t4 = 1 si t2 > t1
-	bne $t4, $0, B2			#salta si t4 = 1
-	j true
+		slt $t4, $t1, $t2		#$t4 = 1 si t2 > t1
+		bne $t4, $0, B2			#salta si t4 = 1
+		j true
 
 	B2:
 		lb $t3 ($t2)			# cargamos el byte
@@ -177,13 +180,35 @@ true:
 	la $a0, yes				#imprime mensaje si es palindromo
 	li $v0,4 
 	syscall
-	j while_true
+	j retry
 	
 false:
 	la $a0,nope				#imprime mensaje si es palindromo
 	li $v0,4 
 	syscall
-	j while_true
+	j retry
+	
+ retry:
+	la $a0, retry_msg
+	syscall
+	li $a1, 4
+	li $v0, 8
+	la $a0, retry_input    #Preguntamos si el usuario quiere probar de nuevo. 
+	syscall
+	
+	la $a0, Enter				#imprime mensaje si es palindromo
+	li $v0,4 
+	syscall
+	
+	#interpretaciones de seguir
+	lb $t0, 0($a0)
+	beq $t0, 121, while_true	#regresa al loop
+	beq	$t0, 89, while_true
+	beq	$t0, 115, while_true
+	beq	$t0, 83, while_true
+	beq	$t0, 10, while_true
+	
+	j fin
 	
 fin:
 	addi $v0, $0, 10        # Systemcall para salir.
