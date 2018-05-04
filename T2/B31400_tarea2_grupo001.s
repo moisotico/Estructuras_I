@@ -6,16 +6,16 @@
 # moiso.camposcr@gmail.com																#
 #***************************************************************************************#
 #***************************************************************************************#
-#	Programa para identificar palindromos, capaz de detectar espacios en blanco y		#
+#	Programa para identificar palindromos, capaz de detectar espacios en blanco y		
 # mayusculas.
 #***************************************************************************************#
 #***************************************************************************************# 
 # $s0: string leido , $s1: string simplificado, $s7: bandera de simbolo no valido,
-#
+# $s2-$s6, $t6, $t7: mascaras para identificar mayusculas, minusculas, puntos, espacios 
+# y comas.
 #***************************************************************************************#
 #***************************************************************************************#
 
-#pendiente revisar si se puede resolver problema con mayusculas.
 
 .data
 #pendiente espacio a $s1
