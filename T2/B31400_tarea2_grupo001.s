@@ -14,12 +14,15 @@
 #
 #***************************************************************************************#
 #***************************************************************************************#
+
+#pendiente revisar si se puede resolver problema con mayusculas.
+
 .data
 #pendiente espacio a $s1
 	intro:		.asciiz "Es su frase un palindromo? Averiguemoslo:\n "	
 	ask_input: .asciiz "\nEscriba una frase de menos de 30 caracteres, solo puede contener puntos, comas o espacios (., ):"
-	buffer1: 	.space 30 
-	buffer2:	.space 30
+	buffer1: 	.space 60 
+	buffer2:	.space 60
 	show_input: .asciiz "\nLa frase escrita fue: \n"
 	msj: 	.asciiz	"longitud de string: "
 	Char:	.asciiz "\nLetra: "
@@ -43,16 +46,21 @@ text_intro:
 		addi $s2, $0, 32		# ASCII de space
 		addi $s3, $0, 44		# ASCII de comma
 		addi $s4, $0, 46		# ASCII de point
-	
+		addi $s5, $0, 64		# banda inf. de Mayusc
+		addi $s6, $0, 91		# banda sup. de Mayusc	
+		addi $t6, $0, 97		# banda inf. de minusc
+		addi $t7, $0, 123		# banda sup. de minusc	
+		
 while_true:
 #mensajes de inicio
+		and $s7, $s7, $0		#flag = 0 
 		la $a0, ask_input		#texto explicativo
 		li $v0, 4 
 		syscall
 		
 		li $v0, 8				#ingresar input
 		la $a0, buffer1			#Carga bits de espacio a $a0 
-		li	$a1, 30
+		li	$a1, 60
 		syscall
 		
 		move $s0, $a0			#guardamos string y string size
@@ -92,8 +100,7 @@ while_true:
 
 #quitamos chars del string para "limpiarlo"		
 	L_string:
-		addi $s5, $0, 65		# banda inf. de Mayusc
-		addi $s6, $0, 91		# banda sup. de Mayusc	
+
 		
 		lb $t1, 0($t0) 			#t1 es str[t0]
 	#	move $a0, $t1			#codigo ascii de la letra
@@ -113,7 +120,7 @@ while_true:
 		rm_pt:
 			beq $t1, $s4, next
 		rm_caps:
-			sge $t2, $s5, $t1		# $t2 = 1 si $t1 >= 65
+			slt $t2, $s5, $t1		# $t2 = 1 si $t1 >= 65
 			slt $t3, $t1, $s6		# $t2 = 1 si $t1 < 91
 			and $t3, $t3, $t2		#cumple ambas condiciones
 			beq $t3, $0, valid
@@ -124,10 +131,8 @@ while_true:
 			j next
 		
 		valid:
-			addi $s5, $0, 97		# banda inf. de minusc
-			addi $s6, $0, 123		# banda sup. de minusc	
-			sge $t2, $t1, $s5		# $t2 = 1 si $t1 >= 97
-			slt $t3, $t1, $s6		# $t2 = 1 si $t1 < 123
+			sge $t2, $t1, $t6		# $t2 = 1 si $t1 >= 97
+			slt $t3, $t1, $t7		# $t2 = 1 si $t1 < 123
 			and $t3, $t3, $t2		#cumple ambas condiciones
 		
 			beq $t3, $0, warning	#si no cumple ambas cod
@@ -189,17 +194,17 @@ false:
 	j retry
 	
  retry:
+	la $a0, Enter				#imprime mensaje si es palindromo
+	li $v0,4 
+	syscall
+ 
 	la $a0, retry_msg
 	syscall
 	li $a1, 4
 	li $v0, 8
 	la $a0, retry_input    #Preguntamos si el usuario quiere probar de nuevo. 
 	syscall
-	
-	la $a0, Enter				#imprime mensaje si es palindromo
-	li $v0,4 
-	syscall
-	
+
 	#interpretaciones de seguir
 	lb $t0, 0($a0)
 	beq $t0, 121, while_true	#regresa al loop
@@ -207,7 +212,6 @@ false:
 	beq	$t0, 115, while_true
 	beq	$t0, 83, while_true
 	beq	$t0, 10, while_true
-	
 	j fin
 	
 fin:
