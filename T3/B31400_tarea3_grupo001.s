@@ -20,8 +20,10 @@
 
 .data
 #frases, pendiente una para angulo
-	intro:		.asciiz "Programa para sacar elementos de un triangulo rectangulo: \n"
-	catAdj:		.asciiz "Escriba un valor para el primer cateto: "
+	intro:		.asciiz "\nTarea 3: Programa para sacar elementos de un triangulo rectangulo. \n"
+	intro2:		.asciiz "#***************************************************************************************#"
+	intro3:		.asciiz "Elaborado por Moises Campos Zepeda - B31400\n->>>(Para salir ingrese 0 en alguno de los catetos) <<<-\n"
+	catAdj:		.asciiz "\nEscriba un valor para el primer cateto: "
 	catOp:		.asciiz "Escriba un valor para el segundo cateto: " 
 	Enter: 		.asciiz "\n"
 	ZeroIng:	.asciiz "\nUno de los catetos es cero\n"
@@ -30,6 +32,8 @@
 	sin_mssg:	.asciiz "\nEl seno del triangulo vale: "
 	cos_mssg:	.asciiz "\nEl coseno del triangulo vale: "
 	ang_mssg: 	.asciiz "\nEl angulo del cateto mayor con la hipotenusa es: "
+	ang_mssg2:	.asciiz " radianes"
+	reset:		.asciiz "\nReiniciando el programa...\n \n"
 .text
 .globl main						#para el ensamblador
 	
@@ -38,10 +42,21 @@
 #***************************************************************************************#	
 main:
 	li.s $f1, 0.0        		# $f1 =0
+	la $a0, intro2				#texto introductorio
+	li $v0, 4 
+	syscall
 	la $a0, intro				#texto introductorio
 	li $v0, 4 
 	syscall
+	la $a0, intro3				#texto introductorio
+	li $v0, 4 
+	syscall
+	la $a0, intro2				#texto introductorio
+	li $v0, 4 
+	syscall
+		
 
+	
 	la $a0, catAdj				#texto  para primer cateto a
 	li $v0, 4 
 	syscall
@@ -101,16 +116,24 @@ next1:
  	syscall
 
 #llamada para angulo	
-	#jal angl
-	#la $a0, ang_mssg			# imprime texto
-	#li $v0,4 
-	#syscall	
+	jal angl
+	la $a0, ang_mssg			# imprime texto
+	li $v0,4 
+	syscall	
 	
-	#mov.s $f12, $f11
-	#li $v0, 2 
- 	#syscall	
+	mov.s $f12, $f11
+	li $v0, 2 
+ 	syscall	
+
+	la $a0, ang_mssg2			# imprime texto
+	li $v0,4 
+	syscall	
 	
-	j fin
+	la $a0, reset			# imprime texto
+	li $v0,4 
+	syscall	
+	
+	j main
 
 #***************************************************************************************#
 #hip: obtiene la hipotenusa a traves del metodo raiz
@@ -156,21 +179,24 @@ jr $ra
 #angl: determina el arcoseno de un valor por aproximacion de taylor	
 #***************************************************************************************#	
 angl:
-	addiu $sp, $sp, -32
+	addiu $sp, $sp, -36
 	s.s $f2, 0($sp)
 	s.s $f3, 8($sp)
 	s.s $f4, 16($sp)
 	s.s $f12, 24($sp)
-	div.s $f5, $f4, $f8		# x' = b/c
-	add.s $f11, $ 	f11,$f5 
+	sw $ra, 32($sp)			#se guarda direccion de retorno
+	
+	div.s $f5, $f4, $f8		# x = d/c
+	mtc1 $zero, $f11		# f11 = 0
+	add.s $f11, $f11,$f5 	# $f11 = x
 	#constantes:	
-	li $t0, 0				# $t0 = n = 0
-	li.s $f20, 1.0e-6 		# $f3: precision del angulo
+	li $t0, 1				# $t0 = n = 1
+	li.s $f20, 1.0e-4 		# $f3: precision del angulo
 	li.s $f4, 4.0			# $f4 = 4.0
 	
 for_angl:
 	mul $t1, $t0, 2			# $t1 = 2n	
-	addi $t4, $t2, 1		# $t4 = 2n+1 
+	addi $t4, $t1, 1		# $t4 = 2n+1 
 	mtc1 $t4, $f14 			# 2n+1 a registro de punto flotante
 	cvt.s.w $f14, $f14 		# $f14: 2n+1 a float
 	
@@ -189,7 +215,7 @@ for_angl:
 	move $a0, $t0			# primer parametro de entrada
 	mov.s $f12, $f4			# segundo parametro de entrada
 	jal exp_xy
-	mov.s $f7, $f0 			#salida
+	mov.s $f7, $f0 			#salida 4^n
 
 	move $a0, $t4			# primer parametro de entrada
 	mov.s $f12, $f5			# segundo parametro de entrada
@@ -209,13 +235,13 @@ for_angl:
 	j for_angl
 
 return_angl:	
-
+	lw $ra, 32($sp)
 	l.s $f12, 24($sp)
 	l.s $f4, 16($sp)
 	l.s $f3, 8($sp)
 	l.s $f2, 0($sp)
 
-	addiu $sp, $sp, 32
+	addiu $sp, $sp, 36
 	jr $ra
 
 #***************************************************************************************#
@@ -249,10 +275,11 @@ factorial:
 #***************************************************************************************
 exp_xy:
 	and $t3, $0, $t3				#i = 0
+	li.s $f0, 1.0					# f0 = 0
 for_exp:
-	bge $t3, $a0, result_exp	#condicion de salida
-	mul.s $f0, $f0, $f12  		# x * $f0
-	addi $t3, $t3, 1 			# i++
+	bge $t3, $a0, result_exp		#condicion de salida
+	mul.s $f0, $f0, $f12  			# f0 = x * $f0
+	addi $t3, $t3, 1 				# i++
 	j for_exp
 result_exp:
 	jr $ra			
